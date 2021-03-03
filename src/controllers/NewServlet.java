@@ -1,9 +1,7 @@
-package contrillers;
+package controllers;
 
 import java.io.IOException;
-import java.util.List;
 
-import javax.persistence.EntityManager;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,19 +10,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import models.Task;
-import utils.DBUtil;
 
 /**
- * Servlet implementation class indexservlet
+ * Servlet implementation class NewServlet
  */
-@WebServlet("/index")
-public class indexservlet extends HttpServlet {
+@WebServlet("/new")
+public class NewServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public indexservlet() {
+    public NewServlet() {
         super();
     }
 
@@ -32,17 +29,12 @@ public class indexservlet extends HttpServlet {
      * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
      */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        EntityManager em = DBUtil.createEntityManager();
+        // CSRF対策
+        request.setAttribute("_token", request.getSession().getId());
 
-        List<Task> tasks = em.createNamedQuery("getAllTasks", Task.class).getResultList();
+        request.setAttribute("task", new Task());
 
-        em.close();
-
-        request.setAttribute("tasks",tasks);
-
-        // サーブレットからJSPの呼び出し
-        RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/tasks/index.jsp");
+        RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/tasks/new.jsp");
         rd.forward(request,response);
     }
-
 }
