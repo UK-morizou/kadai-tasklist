@@ -18,13 +18,13 @@ import utils.DBUtil;
  * Servlet implementation class indexservlet
  */
 @WebServlet("/index")
-public class indexservlet extends HttpServlet {
+public class IndexServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public indexservlet() {
+    public IndexServlet() {
         super();
     }
 
@@ -34,11 +34,25 @@ public class indexservlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         EntityManager em = DBUtil.createEntityManager();
 
-        List<Task> tasks = em.createNamedQuery("getAllTasks", Task.class).getResultList();
+        int page = 1;
+        try {
+                page = Integer.parseInt(request.getParameter("page"));
+        } catch(NumberFormatException e) {}
+
+        // 最大件数と開始位置を指定してタスクを取得
+        List<Task> tasks = em.createNamedQuery("getAllTasks", Task.class)
+                                            .setFirstResult(15 * (page - 1))
+                                            .setMaxResults(15)
+                                            .getResultList();
+        // 全件取得
+        long tasks_count = (long)em.createNamedQuery("getTasksCount", Long.class)
+                                                        .getSingleResult();
 
         em.close();
 
         request.setAttribute("tasks",tasks);
+        request.setAttribute("tasks_count", tasks_count); //全件数
+        request.setAttribute("page", page); // ページ数
 
         // フラッシュメッセージがセッションスコープにセットされていたら
         if(request.getSession().getAttribute("flush") != null) {
