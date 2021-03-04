@@ -40,6 +40,13 @@ public class indexservlet extends HttpServlet {
 
         request.setAttribute("tasks",tasks);
 
+        // フラッシュメッセージがセッションスコープにセットされていたら
+        if(request.getSession().getAttribute("flush") != null) {
+            // セッションスコープ内のフラッシュメッセージをリクエストスコープに保存し、セッションスコープから削除する
+            request.setAttribute("flush", request.getSession().getAttribute("flush"));
+            request.getSession().removeAttribute("flush");
+        }
+
         // サーブレットからJSPの呼び出し
         RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/tasks/index.jsp");
         rd.forward(request,response);
